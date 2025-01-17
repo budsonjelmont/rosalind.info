@@ -81,7 +81,7 @@ for id1, seq1 in intdct.items():
     tmpoverlaps = {} # e.g. {"id2":{15:[15], 17: [17]}}
     for pos1, bp1 in enumerate(seq1):
         print(f"{pos1} : {bp1}")
-        print(tmpoverlaps)
+        print(f"overlaps in progress: {tmpoverlaps}")
         nomatchdct = {}
         # Check all the existing matches to see if we can extend
         for id2, matchdct in tmpoverlaps.items():
@@ -92,7 +92,9 @@ for id1, seq1 in intdct.items():
                 if nextid2pos < id2len:
                     if intdct[id2][nextid2pos] == bp1: # Extend the match
                         print(f"Found a match to extend: ({id2}) {matchstartpos} : {nextid2pos}")
+                        print(f"before: {tmpoverlaps}")
                         tmpoverlaps[id2][matchstartpos].append(nextid2pos)
+                        print(f"after: {tmpoverlaps}")
                     else: # No match
                         if id2 not in nomatchdct:
                             nomatchdct[id2] = [matchstartpos]                        
