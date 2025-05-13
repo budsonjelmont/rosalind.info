@@ -1,0 +1,8 @@
+{
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true
+  },
+"python.terminal.activateEnvInCurrentTerminal": false,
+"black-formatter.importStrategy": "fromEnvironment"
+}

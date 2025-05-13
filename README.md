@@ -1,0 +1,1 @@
+Solutions for, or at least naive attempts at, [rosalind.info](https://rosalind.info/problems/locations/) problems.
