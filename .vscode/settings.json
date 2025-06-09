@@ -1,7 +1,10 @@
 {
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false
   },
 "python.terminal.activateEnvInCurrentTerminal": false,
 "black-formatter.importStrategy": "fromEnvironment"
