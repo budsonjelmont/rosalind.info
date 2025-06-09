@@ -1,0 +1,14 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "lcsm",
+			"type": "debugpy",
+			"request": "launch",
+			"python": "${workspaceFolder}/.venv/bin/python3",
+			"program": "lcsm/lcsm.py",
+			"console": "integratedTerminal",
+			"args": ["lcsm/test.fa"]
+		}
+	]
+}
