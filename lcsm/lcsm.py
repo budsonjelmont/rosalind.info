@@ -42,16 +42,12 @@ with open(infile) as handle:
         # print(record.name)
         seqs[index] = record.seq
 
-posixs_scores = {}
+match_dict = {}
 
 
 def iter_seqs(postuple):
-    print(f"now on postuple: {postuple}")
     for i in range(len(postuple)):
         if postuple[i] + 1 < len(seqs[i]):
-            print(
-                f"queueing up next postuple: {tuple(postuple[j] if j!=i else postuple[j]+1 for j in range(len(postuple)))}"
-            )
             iter_seqs(
                 tuple(
                     postuple[j] if j != i else postuple[j] + 1
@@ -70,13 +66,37 @@ def iter_seqs(postuple):
             allmatch = False
             break
     if allmatch:
-        if False in [i - 1 >= 0 for i in postuple]:
-            score = 1
-        else:
-            score = posixs_scores[tuple(i - 1 for i in postuple)] + 1
+        # if False in [i - 1 >= 0 for i in postuple]:
+        score = 1
+        # else:
+        #     score = match_dict[tuple(i - 1 for i in postuple)] + 1
     else:
         score = 0
-    posixs_scores[postuple] = score
+    match_dict[postuple] = score
 
 
 iter_seqs(tuple(0 for i in range(len(seqs))))
+
+
+def find_substr(coords, substr):
+    if match_dict[coords] == 1:
+        newsubstr = seqs[0][coords[0]] + substr
+        if not False in [i - 1 >= 0 for i in coords]:
+            return find_substr(tuple([i - 1 for i in coords]), newsubstr)
+        else:
+            return substr
+    else:
+        return substr
+
+
+len_longest_match = 0
+longest_match = ""
+
+for coords, match in match_dict.items():
+    substr = find_substr(coords, "")
+    if len(substr) > len_longest_match:
+        len_longest_match = len(substr)
+        longest_match = substr
+
+print(f"longest_match: {longest_match}")
+print(f"len_longest_match: {len_longest_match}")
