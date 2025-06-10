@@ -9,6 +9,15 @@
 			"program": "lcsm/lcsm.py",
 			"console": "integratedTerminal",
 			"args": ["lcsm/test.fa"]
+		},
+		{
+			"name": "lia",
+			"type": "debugpy",
+			"request": "launch",
+			"python": "${workspaceFolder}/.venv/bin/python3",
+			"program": "lia/lia.py",
+			"console": "integratedTerminal",
+			"args": ["2","1"]
 		}
 	]
 }
