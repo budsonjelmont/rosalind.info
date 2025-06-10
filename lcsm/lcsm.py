@@ -80,9 +80,9 @@ iter_seqs(tuple(0 for i in range(len(seqs))))
 
 def find_substr(coords, substr):
     if match_dict[coords] == 1:
-        newsubstr = seqs[0][coords[0]] + substr
+        substr = seqs[0][coords[0]] + substr
         if not False in [i - 1 >= 0 for i in coords]:
-            return find_substr(tuple([i - 1 for i in coords]), newsubstr)
+            return find_substr(tuple([i - 1 for i in coords]), substr)
         else:
             return substr
     else:
