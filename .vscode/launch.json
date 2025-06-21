@@ -11,6 +11,15 @@
 			"args": ["lcsm/test.fa"]
 		},
 		{
+			"name": "iev",
+			"type": "debugpy",
+			"request": "launch",
+			"python": "${workspaceFolder}/.venv/bin/python3",
+			"program": "iev/iev.py",
+			"console": "integratedTerminal",
+			"args": ["1","0","0","1","0","1"]
+		},
+		{
 			"name": "lia",
 			"type": "debugpy",
 			"request": "launch",

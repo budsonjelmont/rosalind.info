@@ -46,6 +46,7 @@ match_dict = {}
 
 
 def iter_seqs(postuple):
+    print(f"now processing: {postuple}")
     for i in range(len(postuple)):
         if postuple[i] + 1 < len(seqs[i]):
             iter_seqs(
@@ -66,10 +67,7 @@ def iter_seqs(postuple):
             allmatch = False
             break
     if allmatch:
-        # if False in [i - 1 >= 0 for i in postuple]:
         score = 1
-        # else:
-        #     score = match_dict[tuple(i - 1 for i in postuple)] + 1
     else:
         score = 0
     match_dict[postuple] = score

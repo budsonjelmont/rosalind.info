@@ -1,7 +1,7 @@
 [project]
 name = "rosalind-info"
 version = "0.1.0"
-description = "Add your description here"
+description = "Solutions for rosalind.info problems"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
