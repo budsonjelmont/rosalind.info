@@ -37,52 +37,42 @@ occurdict = {}
 seqs = {}
 
 with open(infile) as handle:
-    for index, record in enumerate(SeqIO.parse(handle, "fasta")):
+    for ix, record in enumerate(SeqIO.parse(handle, "fasta")):
         # print(record.id)
         # print(record.name)
-        seqs[index] = record.seq
+        seqs[ix] = record.seq
 
-match_dict = {}
+occur_dict = {}
+
+for ix, record in seqs.items():
+    for i, c in enumerate(record):  # each basepair in seq with index ix
+        if c not in occur_dict:
+            occur_dict[c] = {
+                seqsix: [] for seqsix in seqs.keys()
+            }  # initialize dict with empty array of matching positions for each sequence, with outer dict keyed on the basepair & inner dict keyed on the sequence index
+        occur_dict[c][ix].append(i)
+
+match_list = []
 
 
-def iter_seqs(postuple):
-    print(f"now processing: {postuple}")
-    for i in range(len(postuple)):
-        if postuple[i] + 1 < len(seqs[i]):
-            iter_seqs(
-                tuple(
-                    postuple[j] if j != i else postuple[j] + 1
-                    for j in range(len(postuple))
-                )
-            )
-    lastchar = None
-    allmatch = True
-    for i in range(len(postuple)):
-        currentchar = seqs[i][postuple[i]]
-        if not lastchar:
-            lastchar = currentchar
-        elif lastchar == currentchar:
-            continue
+def find_matching_pos(char, seqix, tuple):
+    nextseqix = seqix + 1
+    for occurrence in occur_dict[char][seqix]:
+        if nextseqix < len(seqs):
+            find_matching_pos(char, nextseqix, tuple + (occurrence,))
         else:
-            allmatch = False
-            break
-    if allmatch:
-        score = 1
-    else:
-        score = 0
-    match_dict[postuple] = score
+            match_list.append(tuple + (occurrence,))
 
 
-iter_seqs(tuple(0 for i in range(len(seqs))))
+for c in occur_dict.keys():
+    find_matching_pos(c, 0, ())
 
 
 def find_substr(coords, substr):
-    if match_dict[coords] == 1:
-        substr = seqs[0][coords[0]] + substr
-        if not False in [i - 1 >= 0 for i in coords]:
-            return find_substr(tuple([i - 1 for i in coords]), substr)
-        else:
-            return substr
+    substr = seqs[0][coords[0]] + substr
+    nextcoords = tuple([i - 1 for i in coords])
+    if nextcoords in match_list:
+        return find_substr(nextcoords, substr)
     else:
         return substr
 
@@ -90,7 +80,7 @@ def find_substr(coords, substr):
 len_longest_match = 0
 longest_match = ""
 
-for coords, match in match_dict.items():
+for coords in match_list:
     substr = find_substr(coords, "")
     if len(substr) > len_longest_match:
         len_longest_match = len(substr)
