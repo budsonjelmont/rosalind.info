@@ -42,49 +42,46 @@ with open(infile) as handle:
         # print(record.name)
         seqs[ix] = record.seq
 
-occur_dict = {}
+pos_scores = {}
 
-for ix, record in seqs.items():
-    for i, c in enumerate(record):  # each basepair in seq with index ix
-        if c not in occur_dict:
-            occur_dict[c] = {
-                seqsix: [] for seqsix in seqs.keys()
-            }  # initialize dict with empty array of matching positions for each sequence, with outer dict keyed on the basepair & inner dict keyed on the sequence index
-        occur_dict[c][ix].append(i)
-
-match_list = []
-
-
-def find_matching_pos(char, seqix, tuple):
-    nextseqix = seqix + 1
-    for occurrence in occur_dict[char][seqix]:
-        if nextseqix < len(seqs):
-            find_matching_pos(char, nextseqix, tuple + (occurrence,))
+def check_pos(coords, seqix):
+    '''
+    '''
+    if seqix < len(seqs): # if there are other seqs not traversed yet
+        for charix, char in enumerate(seqs[seqix]):  # each basepair in seq with index ix
+            check_pos(coords + (charix,), seqix + 1) # recurse by calling check_pos() again on the next sequence with each position in the current sequence
+    else:
+        if all([seqs[d[0]][d[1]]==seqs[0][coords[0]] for d in zip(seqs, coords)]): ## if all sequences match at this position
+            if all([ix-1 >= 0 for ix in coords]): # if there's a previous position is still inside the sequence space
+                pos_scores[coords] = pos_scores[tuple([ix-1 for ix in coords])] + 1
+            else:
+                pos_scores[coords] = 1
         else:
-            match_list.append(tuple + (occurrence,))
+            pos_scores[coords] = 0
+        return
 
-
-for c in occur_dict.keys():
-    find_matching_pos(c, 0, ())
-
+check_pos((), 0) # start with empty tuple
 
 def find_substr(coords, substr):
     substr = seqs[0][coords[0]] + substr
     nextcoords = tuple([i - 1 for i in coords])
-    if nextcoords in match_list:
-        return find_substr(nextcoords, substr)
+    if all([ix-1 >= 0 for ix in nextcoords]):
+        if pos_scores[nextcoords]> 0:
+            return find_substr(nextcoords, substr)
+        else:
+            return substr
     else:
         return substr
-
 
 len_longest_match = 0
 longest_match = ""
 
-for coords in match_list:
-    substr = find_substr(coords, "")
-    if len(substr) > len_longest_match:
-        len_longest_match = len(substr)
-        longest_match = substr
+for coords, score in pos_scores.items(): # for every scored position
+    if score > 0:
+        substr = find_substr(coords, "")
+        if len(substr) > len_longest_match:
+            len_longest_match = len(substr)
+            longest_match = substr
 
 print(f"longest_match: {longest_match}")
 print(f"len_longest_match: {len_longest_match}")
