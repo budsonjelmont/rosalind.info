@@ -28,6 +28,7 @@
 
 import sys
 from Bio import SeqIO
+import numpy as np
 
 infile = sys.argv[1]
 
@@ -42,14 +43,15 @@ with open(infile) as handle:
         # print(record.name)
         seqs[ix] = record.seq
 
-pos_scores = {}
+pos_scores={}
 
-def check_pos(coords, seqix):
+def check_pos(coords):
     '''
     '''
+    seqix = len(coords)
     if seqix < len(seqs): # if there are other seqs not traversed yet
         for charix, char in enumerate(seqs[seqix]):  # each basepair in seq with index ix
-            check_pos(coords + (charix,), seqix + 1) # recurse by calling check_pos() again on the next sequence with each position in the current sequence
+            check_pos(coords + (charix,)) # recurse by calling check_pos() again on the next sequence with each position in the current sequence
     else:
         if all([seqs[d[0]][d[1]]==seqs[0][coords[0]] for d in zip(seqs, coords)]): ## if all sequences match at this position
             if all([ix-1 >= 0 for ix in coords]): # if there's a previous position is still inside the sequence space
@@ -60,7 +62,7 @@ def check_pos(coords, seqix):
             pos_scores[coords] = 0
         return
 
-check_pos((), 0) # start with empty tuple
+check_pos(()) # start with empty tuple
 
 def find_substr(coords, substr):
     substr = seqs[0][coords[0]] + substr
