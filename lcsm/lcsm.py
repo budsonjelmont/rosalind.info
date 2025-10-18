@@ -8,9 +8,7 @@
 # Note that the longest common substring is not necessarily unique; for a simple example, "AA" and "CC" are both longest common substrings of "AACC" and "CCAA".
 
 # Given: A collection of k
-# (k≤100
-
-# ) DNA strings of length at most 1 kbp each in FASTA format.
+# (k≤100) DNA strings of length at most 1 kbp each in FASTA format.
 
 # Return: A longest common substring of the collection. (If multiple solutions exist, you may return any single solution.)
 # Sample Dataset
@@ -32,9 +30,6 @@ import numpy as np
 
 infile = sys.argv[1]
 
-lendict = {}
-occurdict = {}
-
 seqs = {}
 
 with open(infile) as handle:
@@ -43,7 +38,8 @@ with open(infile) as handle:
         # print(record.name)
         seqs[ix] = record.seq
 
-pos_scores={}
+all_coords = []
+pos_scores = np.ndarray([len(s) for s in seqs.values()], int)
 
 def check_pos(coords):
     '''
@@ -53,6 +49,7 @@ def check_pos(coords):
         for charix, char in enumerate(seqs[seqix]):  # each basepair in seq with index ix
             check_pos(coords + (charix,)) # recurse by calling check_pos() again on the next sequence with each position in the current sequence
     else:
+        all_coords.append(coords)
         if all([seqs[d[0]][d[1]]==seqs[0][coords[0]] for d in zip(seqs, coords)]): ## if all sequences match at this position
             if all([ix-1 >= 0 for ix in coords]): # if there's a previous position is still inside the sequence space
                 pos_scores[coords] = pos_scores[tuple([ix-1 for ix in coords])] + 1
@@ -78,8 +75,8 @@ def find_substr(coords, substr):
 len_longest_match = 0
 longest_match = ""
 
-for coords, score in pos_scores.items(): # for every scored position
-    if score > 0:
+for coords in all_coords: # for every scored position
+    if pos_scores[coords] > 0:
         substr = find_substr(coords, "")
         if len(substr) > len_longest_match:
             len_longest_match = len(substr)
