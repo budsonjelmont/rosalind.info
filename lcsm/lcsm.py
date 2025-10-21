@@ -26,7 +26,7 @@
 
 import sys
 from Bio import SeqIO
-import numpy as np
+from multiprocessing import Pool, Manager
 
 infile = sys.argv[1]
 
@@ -38,21 +38,24 @@ with open(infile) as handle:
         # print(record.name)
         seqs[ix] = record.seq
 
-all_coords = []
-pos_scores = np.ndarray([len(s) for s in seqs.values()], int)
+pos_scores = Manager().dict()
 
 def check_pos(coords):
     '''
     '''
     seqix = len(coords)
     if seqix < len(seqs): # if there are other seqs not traversed yet
-        for charix, char in enumerate(seqs[seqix]):  # each basepair in seq with index ix
-            check_pos(coords + (charix,)) # recurse by calling check_pos() again on the next sequence with each position in the current sequence
+        if seqix == len(seqs)-1:
+            with Pool(None) as pool:
+                pool.map(check_pos, [coords + (charix,) for charix, char in enumerate(seqs[seqix]) ])
+        else:
+            for charix, char in enumerate(seqs[seqix]):  # each basepair in seq with index ix
+                check_pos(coords + (charix,)) # recurse by calling check_pos() again on the next sequence with each position in the current sequence
     else:
-        all_coords.append(coords)
         if all([seqs[d[0]][d[1]]==seqs[0][coords[0]] for d in zip(seqs, coords)]): ## if all sequences match at this position
-            if all([ix-1 >= 0 for ix in coords]): # if there's a previous position is still inside the sequence space
-                pos_scores[coords] = pos_scores[tuple([ix-1 for ix in coords])] + 1
+            prevcoords = tuple([i - 1 for i in coords])
+            if all([ix >= 0 for ix in prevcoords]): # if there's a previous position is still inside the sequence space
+                pos_scores[coords] = pos_scores[prevcoords] + 1
             else:
                 pos_scores[coords] = 1
         else:
@@ -63,10 +66,10 @@ check_pos(()) # start with empty tuple
 
 def find_substr(coords, substr):
     substr = seqs[0][coords[0]] + substr
-    nextcoords = tuple([i - 1 for i in coords])
-    if all([ix-1 >= 0 for ix in nextcoords]):
-        if pos_scores[nextcoords]> 0:
-            return find_substr(nextcoords, substr)
+    prevcoords = tuple([i - 1 for i in coords])
+    if all([ix >= 0 for ix in prevcoords]):
+        if pos_scores[prevcoords]> 0:
+            return find_substr(prevcoords, substr)
         else:
             return substr
     else:
@@ -75,7 +78,7 @@ def find_substr(coords, substr):
 len_longest_match = 0
 longest_match = ""
 
-for coords in all_coords: # for every scored position
+for coords in pos_scores: # for every scored position
     if pos_scores[coords] > 0:
         substr = find_substr(coords, "")
         if len(substr) > len_longest_match:
