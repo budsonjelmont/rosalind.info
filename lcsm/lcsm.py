@@ -26,64 +26,68 @@
 
 import sys
 from Bio import SeqIO
-from multiprocessing import Pool, Manager
 
 infile = sys.argv[1]
 
-seqs = {}
+seqs = []
 
 with open(infile) as handle:
     for ix, record in enumerate(SeqIO.parse(handle, "fasta")):
         # print(record.id)
         # print(record.name)
-        seqs[ix] = record.seq
+        seqs.append(record.seq)
 
-pos_scores = Manager().dict()
 
-def check_pos(coords):
+def check_pos(coords, aln_seqs):
     '''
     '''
     seqix = len(coords)
-    if seqix < len(seqs): # if there are other seqs not traversed yet
-        if seqix == len(seqs)-1:
-            with Pool(None) as pool:
-                pool.map(check_pos, [coords + (charix,) for charix, char in enumerate(seqs[seqix]) ])
-        else:
-            for charix, char in enumerate(seqs[seqix]):  # each basepair in seq with index ix
-                check_pos(coords + (charix,)) # recurse by calling check_pos() again on the next sequence with each position in the current sequence
+    if seqix < len(aln_seqs): # if there are other seqs not traversed yet
+        for charix in range(0,len(aln_seqs[seqix])): # each basepair in seq with index ix
+            check_pos(coords + (charix,), aln_seqs) # recurse by calling check_pos() again on the next sequence with each position in the current sequence
     else:
-        if all([seqs[d[0]][d[1]]==seqs[0][coords[0]] for d in zip(seqs, coords)]): ## if all sequences match at this position
+        if all([d[0][d[1]]==aln_seqs[0][coords[0]] for d in zip(aln_seqs, coords)]): ## if all sequences match at this position
             prevcoords = tuple([i - 1 for i in coords])
-            if all([ix >= 0 for ix in prevcoords]): # if there's a previous position is still inside the sequence space
+            if all([ix >= 0 for ix in prevcoords]) and prevcoords in pos_scores: # if there's a previous position is still inside the sequence space
                 pos_scores[coords] = pos_scores[prevcoords] + 1
             else:
                 pos_scores[coords] = 1
-        else:
-            pos_scores[coords] = 0
+        # else:
+        #     pos_scores[coords] = 0
         return
 
-check_pos(()) # start with empty tuple
-
-def find_substr(coords, substr):
-    substr = seqs[0][coords[0]] + substr
+def find_substr(coords, seq, substr):
+    substr = seq[coords[0]] + substr
     prevcoords = tuple([i - 1 for i in coords])
     if all([ix >= 0 for ix in prevcoords]):
-        if pos_scores[prevcoords]> 0:
-            return find_substr(prevcoords, substr)
+        if prevcoords in pos_scores:
+            return find_substr(prevcoords, seq, substr)
         else:
             return substr
     else:
         return substr
 
-len_longest_match = 0
-longest_match = ""
+candidates = [seqs[0]]
 
-for coords in pos_scores: # for every scored position
-    if pos_scores[coords] > 0:
-        substr = find_substr(coords, "")
-        if len(substr) > len_longest_match:
-            len_longest_match = len(substr)
-            longest_match = substr
+pos_scores = {}
+
+for seq in seqs[1:]:
+    remaining_candidates = []
+    for candidate in candidates:
+        pos_scores = {}
+        check_pos((),[seq,candidate])
+        for coords in pos_scores: # for every scored position
+            substr = find_substr(coords, seq, "")
+            if substr not in remaining_candidates:
+                remaining_candidates.append(substr)
+    candidates = remaining_candidates
+
+longest_match = None
+len_longest_match = 0
+for substr in candidates:
+    if len(substr) > len_longest_match:
+        longest_match = substr
+        len_longest_match = len(substr)
 
 print(f"longest_match: {longest_match}")
 print(f"len_longest_match: {len_longest_match}")
