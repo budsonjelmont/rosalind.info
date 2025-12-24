@@ -91,3 +91,8 @@ for substr in candidates:
 
 print(f"longest_match: {longest_match}")
 print(f"len_longest_match: {len_longest_match}")
+
+if len(sys.argv)>2:
+    outfile = sys.argv[2]
+    with open(outfile, 'w+') as f:
+        f.write(longest_match)
