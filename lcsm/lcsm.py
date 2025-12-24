@@ -37,31 +37,35 @@ with open(infile) as handle:
         # print(record.name)
         seqs.append(record.seq)
 
+def pairwise_aln(seq1,seq2):
+    mtx = [[0 for j in seq2] for i in seq1]
+    for ix1 in range(0,len(seq1)):
+        for ix2 in range(0,len(seq2)):
+            if seq1[ix1] == seq2[ix2]:
+                if ix1 > 0 and ix2 > 0:
+                    mtx[ix1][ix2] = max(0, mtx[ix1-1][ix2-1])+1
+                else:
+                    mtx[ix1][ix2] = 1
+    return mtx
 
-def check_pos(coords, aln_seqs):
-    '''
-    '''
-    seqix = len(coords)
-    if seqix < len(aln_seqs): # if there are other seqs not traversed yet
-        for charix in range(0,len(aln_seqs[seqix])): # each basepair in seq with index ix
-            check_pos(coords + (charix,), aln_seqs) # recurse by calling check_pos() again on the next sequence with each position in the current sequence
-    else:
-        if all([d[0][d[1]]==aln_seqs[0][coords[0]] for d in zip(aln_seqs, coords)]): ## if all sequences match at this position
-            prevcoords = tuple([i - 1 for i in coords])
-            if all([ix >= 0 for ix in prevcoords]) and prevcoords in pos_scores: # if there's a previous position is still inside the sequence space
-                pos_scores[coords] = pos_scores[prevcoords] + 1
-            else:
-                pos_scores[coords] = 1
-        # else:
-        #     pos_scores[coords] = 0
-        return
+# Get just the last positions of contiguous matches
+def get_aln_last_pos(mtx):
+    last_pos = []
+    for ix1 in range(0,len(mtx)):
+        for ix2 in range(0,len(mtx[ix1])):
+            if mtx[ix1][ix2] > 0: # if there's a match at this position 
+                if ix1+1 == len(mtx) or ix2+1 == len(mtx[ix1]): # if the match can't be extended because you're at a sequence boundary already
+                    last_pos += [(ix1, ix2)]
+                elif mtx[ix1+1][ix2+1] == 0: # if the match wasn't extended because next position was mismatchs
+                    last_pos += [(ix1, ix2)]
+    return last_pos
 
-def find_substr(coords, seq, substr):
+def find_substr(mtx, coords, seq, substr):
     substr = seq[coords[0]] + substr
     prevcoords = tuple([i - 1 for i in coords])
     if all([ix >= 0 for ix in prevcoords]):
-        if prevcoords in pos_scores:
-            return find_substr(prevcoords, seq, substr)
+        if mtx[prevcoords[0]][prevcoords[1]] > 0:
+            return find_substr(mtx, prevcoords, seq, substr)
         else:
             return substr
     else:
@@ -69,18 +73,14 @@ def find_substr(coords, seq, substr):
 
 candidates = [seqs[0]]
 
-pos_scores = {}
-
 for seq in seqs[1:]:
     remaining_candidates = []
     for candidate in candidates:
-        pos_scores = {}
-        check_pos((),[seq,candidate])
-        for coords in pos_scores: # for every scored position
-            substr = find_substr(coords, seq, "")
-            if substr not in remaining_candidates:
-                remaining_candidates.append(substr)
-    candidates = remaining_candidates
+        mtx = pairwise_aln(candidate, seq)
+        last_pos = get_aln_last_pos(mtx)
+        matches = [ find_substr(mtx, t, candidate, "") for t in last_pos ]
+        remaining_candidates += matches
+    candidates = set(remaining_candidates)
 
 longest_match = None
 len_longest_match = 0
