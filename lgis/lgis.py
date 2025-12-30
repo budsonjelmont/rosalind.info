@@ -54,38 +54,27 @@ def get_subsequence(subseq, ix, seq, mtx):
     elif current['op']=='o':
         return subseq
 
-asc_result = calc_mtx(seq)
-asc_mtx = asc_result['matrix']
-asc_running_totals = asc_result['column_maxes']
+def calculate_longest_subsequence(seq, asc=True):
+    result = calc_mtx(seq, asc)
+    mtx = result['matrix']
+    running_totals = result['column_maxes']
 
-asc_max_of_totals = 0
-asc_max_of_totals_ix = (0,0)
+    max_of_totals = 0
+    max_of_totals_ix = (0,0)
 
-for running_total in asc_running_totals:
-    if running_total['total'] > asc_max_of_totals:
-        asc_max_of_totals = running_total['total']
-        asc_max_of_totals_ix = running_total['total_ix']
+    for running_total in running_totals:
+        if running_total['total'] > max_of_totals:
+            max_of_totals = running_total['total']
+            max_of_totals_ix = running_total['total_ix']
 
-asc_subseq = get_subsequence([], asc_max_of_totals_ix, seq, asc_mtx)
+    return get_subsequence([], max_of_totals_ix, seq, mtx)
+
+asc_subseq = calculate_longest_subsequence(seq)
+dsc_subseq = calculate_longest_subsequence(seq, False)
 asc_subseq_str = " ".join([str(i) for i in asc_subseq[::-1]]) # array elements are in reverse order
-
-dsc_result = calc_mtx(seq, asc=False)
-dsc_mtx = dsc_result['matrix']
-dsc_running_totals = dsc_result['column_maxes']
-
-dsc_max_of_totals = 0
-dsc_max_of_totals_ix = (0,0)
-
-for running_total in dsc_running_totals:
-    if running_total['total'] > dsc_max_of_totals:
-        dsc_max_of_totals = running_total['total']
-        dsc_max_of_totals_ix = running_total['total_ix']
-
-dsc_subseq = get_subsequence([], dsc_max_of_totals_ix, seq, dsc_mtx)
 dsc_subseq_str = " ".join([str(i) for i in dsc_subseq[::-1]]) # array elements are in reverse order
 
-print(asc_subseq_str)
-print(dsc_subseq_str)
+print(f'{asc_subseq_str}\n{dsc_subseq_str}')
 
 if len(sys.argv)>1:
     outfile = sys.argv[1]
