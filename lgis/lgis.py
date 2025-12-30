@@ -46,7 +46,7 @@ for j in range(0,len(seq)): # column-major
             else:
                 asc_mtx[i][j] = {'op':None,'score':None,'last_ix':None}
         # calculate the highest scoring subsequence at this position
-        if (0 if asc_mtx[i][j]['score'] is None else asc_mtx[i][j]['score']) >= colmax:
+        if (0 if asc_mtx[i][j]['score'] is None else asc_mtx[i][j]['score']) > colmax:
             colmax = asc_mtx[i][j]['score']
             colmax_ix = (i,j)
     colmaxes += [(colmax, colmax_ix)]
