@@ -2,6 +2,14 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "lgis",
+			"type": "debugpy",
+			"request": "launch",
+			"python": "${workspaceFolder}/.venv/bin/python3",
+			"program": "lgis/lgis.py",
+			"console": "integratedTerminal",
+		},
+    {
 			"name": "lcsm",
 			"type": "debugpy",
 			"request": "launch",
