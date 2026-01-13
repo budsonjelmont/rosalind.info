@@ -18,8 +18,15 @@
 
 import sys
 
-n=input()
-seq=[int(i) for i in input().split()]
+if len(sys.argv)>1:
+    infile = sys.argv[1]
+    with open(infile, 'r') as f:
+        n = int(f.readline())
+        seqstr = f.readline()
+        seq = [int(i) for i in seqstr.split()]
+else:
+    n=input()
+    seq=[int(i) for i in input().split()]
 
 def calc_mtx(seq, asc=True): 
     running_totals = []
@@ -76,7 +83,7 @@ dsc_subseq_str = " ".join([str(i) for i in dsc_subseq[::-1]]) # array elements a
 
 print(f'{asc_subseq_str}\n{dsc_subseq_str}')
 
-if len(sys.argv)>1:
-    outfile = sys.argv[1]
+if len(sys.argv)>2:
+    outfile = sys.argv[2]
     with open(outfile, 'w+') as f:
         f.write(f'{asc_subseq_str}\n{dsc_subseq_str}')
