@@ -17,6 +17,85 @@
 # 5 4 2
 
 import sys
+ 
+ # longest increasing subsequence
+def lis(arr, n):
+    
+    # Array where each position's value is the index in arr that marks the tail of a subsequence with length == that position index. Zero-padded.
+    tail_ixs =[0 for i in range(n + 1)]  
+
+    # Array where each position's value is the arr index of the predecessor of the longest subsequence ending at that position. Initialized with -1. Zero-padded.
+    prev_ixs =[-1 for i in range(n + 1)]  
+    
+    # Initialized to 1 since there will always be a subsequence of at least this length
+    len = 1 
+    
+    for i in range(1,n):
+    
+        if arr[i] < arr[tail_ixs[0]]:
+            tail_ixs[0] = tail_ixs[1] = i
+        elif arr[i] > arr[tail_ixs[len]]:
+            prev_ixs[i] = tail_ixs[len]
+            len += 1
+            tail_ixs[len] = i
+        else:
+            # Binary search to find the first tail index >= this element
+            l = 0
+            r = len
+            while l < r:
+                pos = (l + r)// 2
+                if arr[tail_ixs[pos]] >= arr[i]:
+                    r = pos - 1
+                elif arr[tail_ixs[pos]] < arr[i]:
+                    l = pos + 1
+            prev_ixs[i] = prev_ixs[tail_ixs[l]]
+            tail_ixs[l] = i
+
+    return tail_ixs, prev_ixs, len
+
+# longest decreasing subsequence
+def lds(arr, n):
+
+    # Array where each position's value is the index in arr that marks the tail of a subsequence with length == that position index. Zero-padded.
+    tail_ixs =[0 for i in range(n + 1)]  
+
+    # Array where each position's value is the arr index of the predecessor of the longest subsequence ending at that position. Initialized with -1. Zero-padded.
+    prev_ixs =[-1 for i in range(n + 1)]  
+    
+    # Initialized to 1 since there will always be a subsequence of at least this length
+    len = 1 
+    
+    for i in range(1,n):
+    
+        if arr[i] > arr[tail_ixs[0]]:
+            tail_ixs[0] = tail_ixs[1] = i
+        elif arr[i] < arr[tail_ixs[len]]:
+            prev_ixs[i] = tail_ixs[len]
+            len += 1
+            tail_ixs[len] = i
+        else:
+            # Binary search to find the first tail index <= this element
+            l = 0
+            r = len
+            while l < r:
+                pos = (l + r)// 2
+                if arr[tail_ixs[pos]] <= arr[i]:
+                    r = pos - 1
+                elif arr[tail_ixs[pos]] > arr[i]:
+                    l = pos + 1
+            prev_ixs[i] = prev_ixs[tail_ixs[l]]
+            tail_ixs[l] = i
+
+    return tail_ixs, prev_ixs, len
+
+def get_subsequence(tail_ixs, prev_ixs, len):
+    i = tail_ixs[len]
+    subseq=[]
+    while(i >= 0):
+        subseq+=[str(seq[i])]
+        i = prev_ixs[i]
+    return subseq[::-1]
+
 
 if len(sys.argv)>1:
     infile = sys.argv[1]
@@ -25,65 +104,18 @@ if len(sys.argv)>1:
         seqstr = f.readline()
         seq = [int(i) for i in seqstr.split()]
 else:
-    n=input()
+    n=int(input())
     seq=[int(i) for i in input().split()]
 
-def calc_mtx(seq, asc=True): 
-    running_totals = []
-    mtx = [[{'op':'-','score':0,'last_ix':()} for s in seq] for s in seq]
-    for j in range(0,len(seq)): # column-major
-        # initialize column max variables to track the longest subsequence that terminates in this column
-        running_total = 0
-        running_total_ix = (-1,-1)
-        for i in range(0,len(seq)):
-            if i > j:
-                continue
-            elif i == j:
-                mtx[i][j] = {'op':'o','score':1, 'last_ix':()} # start a new subsequence
-            else:
-                if (asc and seq[j] > seq[i]) or (not asc and seq[j] < seq[i]):
-                    mtx[i][j] = {'op':'e','score':running_totals[i]['total']+1,'last_ix':(running_totals[i]['total_ix'])}
-                else:
-                    mtx[i][j] = {'op':None,'score':None,'last_ix':None}
-            # calculate the highest scoring subsequence at this position
-            if (0 if mtx[i][j]['score'] is None else mtx[i][j]['score']) > running_total:
-                running_total = mtx[i][j]['score']
-                running_total_ix = (i,j)
-        running_totals += [{'total':running_total, 'total_ix':running_total_ix}]
-    return {'matrix':mtx,'column_maxes':running_totals}
+lis_tail_ixs, lis_prev_ixs, lis_len = lis(seq, n)
+lds_tail_ixs, lds_prev_ixs, lds_len = lds(seq, n)
 
-def get_subsequence(subseq, ix, seq, mtx):
-    current = mtx[ix[0]][ix[1]]
-    subseq += [seq[ix[1]]]
-    if current['op']=='e':
-        next_ix = current['last_ix']
-        return get_subsequence(subseq, next_ix, seq, mtx)
-    elif current['op']=='o':
-        return subseq
+li_subseq = " ".join(get_subsequence(lis_tail_ixs, lis_prev_ixs, lis_len))
+ld_subseq = " ".join(get_subsequence(lds_tail_ixs, lds_prev_ixs, lds_len))
 
-def calculate_longest_subsequence(seq, asc=True):
-    result = calc_mtx(seq, asc)
-    mtx = result['matrix']
-    running_totals = result['column_maxes']
-
-    max_of_totals = 0
-    max_of_totals_ix = (0,0)
-
-    for running_total in running_totals:
-        if running_total['total'] > max_of_totals:
-            max_of_totals = running_total['total']
-            max_of_totals_ix = running_total['total_ix']
-
-    return get_subsequence([], max_of_totals_ix, seq, mtx)
-
-asc_subseq = calculate_longest_subsequence(seq)
-dsc_subseq = calculate_longest_subsequence(seq, False)
-asc_subseq_str = " ".join([str(i) for i in asc_subseq[::-1]]) # array elements are in reverse order
-dsc_subseq_str = " ".join([str(i) for i in dsc_subseq[::-1]]) # array elements are in reverse order
-
-print(f'{asc_subseq_str}\n{dsc_subseq_str}')
+print(f'{li_subseq}\n{ld_subseq}')
 
 if len(sys.argv)>2:
     outfile = sys.argv[2]
     with open(outfile, 'w+') as f:
-        f.write(f'{asc_subseq_str}\n{dsc_subseq_str}')
+        f.write(f'{li_subseq}\n{ld_subseq}')
