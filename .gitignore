@@ -1,3 +1,7 @@
 *.txt
+*.in
+*.input
 *.out
+*.output
 *.fa
+scratch

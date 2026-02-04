@@ -8,8 +8,9 @@
 			"python": "${workspaceFolder}/.venv/bin/python3",
 			"program": "lgis/lgis.py",
 			"console": "integratedTerminal",
+			"args": ["lgis/test.input","lgis/test.output"]
 		},
-    {
+		{
 			"name": "lcsm",
 			"type": "debugpy",
 			"request": "launch",
