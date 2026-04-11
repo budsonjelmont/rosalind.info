@@ -41,12 +41,12 @@ def test_lds_3():
     assert res_lds == expect_lds
 
 def test_lis_4():
-    res_lis = lis([2, 8, 9, 5, 6, 7, 1], 5)
+    res_lis = lis([2, 8, 9, 5, 6, 7, 1], 7)
     expect_lis = [2, 5, 6, 7]
     assert res_lis == expect_lis
 
 def test_lds_4():
-    res_lds = lds([2, 8, 9, 5, 6, 7, 1], 5)
+    res_lds = lds([2, 8, 9, 5, 6, 7, 1], 7)
     expect_lds = [9, 7, 1]
     assert res_lds == expect_lds
 
@@ -61,4 +61,4 @@ def test_lds_5():
     assert res_lds == expect_lds
 
 if __name__ == "__main__":
-    test_lds_0()
+    test_lds_4()

@@ -18,6 +18,15 @@
 
 import sys
  
+# reconstruct the longest subsequence
+def get_subsequence(seq, tail_ixs, prev_ixs, len):
+    i = tail_ixs[len]
+    subseq=[]
+    while(i >= 0):
+        subseq+=[seq[i]]
+        i = prev_ixs[i]
+    return subseq[::-1]
+
  # longest increasing subsequence
 def lis(arr, n):
     
@@ -32,7 +41,7 @@ def lis(arr, n):
     
     for i in range(1,n):
     
-        if arr[i] < arr[tail_ixs[0]]:
+        if arr[i] <= arr[tail_ixs[0]]:
             tail_ixs[0] = tail_ixs[1] = i
         elif arr[i] > arr[tail_ixs[len]]:
             prev_ixs[i] = tail_ixs[len]
@@ -48,10 +57,10 @@ def lis(arr, n):
                     r = pos - 1
                 elif arr[tail_ixs[pos]] < arr[i]:
                     l = pos + 1
-            prev_ixs[i] = prev_ixs[tail_ixs[l]]
+            prev_ixs[i] = tail_ixs[l-1]
             tail_ixs[l] = i
 
-    return tail_ixs, prev_ixs, len
+    return get_subsequence(arr, tail_ixs, prev_ixs, len)
 
 # longest decreasing subsequence
 def lds(arr, n):
@@ -67,8 +76,8 @@ def lds(arr, n):
     
     for i in range(1,n):
     
-        if arr[i] > arr[tail_ixs[0]]:
-            tail_ixs[0] = tail_ixs[1] = i
+        if arr[i] >= arr[tail_ixs[1]]:
+            tail_ixs[1] = i
         elif arr[i] < arr[tail_ixs[len]]:
             prev_ixs[i] = tail_ixs[len]
             len += 1
@@ -83,39 +92,28 @@ def lds(arr, n):
                     r = pos - 1
                 elif arr[tail_ixs[pos]] > arr[i]:
                     l = pos + 1
-            prev_ixs[i] = prev_ixs[tail_ixs[l]]
+            prev_ixs[i] = tail_ixs[l-1]
             tail_ixs[l] = i
 
-    return tail_ixs, prev_ixs, len
+    return get_subsequence(arr, tail_ixs, prev_ixs, len)
 
-def get_subsequence(tail_ixs, prev_ixs, len):
-    i = tail_ixs[len]
-    subseq=[]
-    while(i >= 0):
-        subseq+=[str(seq[i])]
-        i = prev_ixs[i]
-    return subseq[::-1]
+if __name__ == "__main__":
+    if len(sys.argv)>1:
+        infile = sys.argv[1]
+        with open(infile, 'r') as f:
+            n = int(f.readline())
+            seqstr = f.readline()
+            seq = [int(i) for i in seqstr.split()]
+    else:
+        n=int(input())
+        seq=[int(i) for i in input().split()]
 
+    li_subseq = " ".join([str(s) for s in lis(seq, n)])
+    ld_subseq = " ".join([str(s) for s in lds(seq, n)])
 
-if len(sys.argv)>1:
-    infile = sys.argv[1]
-    with open(infile, 'r') as f:
-        n = int(f.readline())
-        seqstr = f.readline()
-        seq = [int(i) for i in seqstr.split()]
-else:
-    n=int(input())
-    seq=[int(i) for i in input().split()]
+    print(f'{li_subseq}\n{ld_subseq}')
 
-lis_tail_ixs, lis_prev_ixs, lis_len = lis(seq, n)
-lds_tail_ixs, lds_prev_ixs, lds_len = lds(seq, n)
-
-li_subseq = " ".join(get_subsequence(lis_tail_ixs, lis_prev_ixs, lis_len))
-ld_subseq = " ".join(get_subsequence(lds_tail_ixs, lds_prev_ixs, lds_len))
-
-print(f'{li_subseq}\n{ld_subseq}')
-
-if len(sys.argv)>2:
-    outfile = sys.argv[2]
-    with open(outfile, 'w+') as f:
-        f.write(f'{li_subseq}\n{ld_subseq}')
+    if len(sys.argv)>2:
+        outfile = sys.argv[2]
+        with open(outfile, 'w+') as f:
+            f.write(f'{li_subseq}\n{ld_subseq}')
