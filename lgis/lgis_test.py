@@ -60,5 +60,15 @@ def test_lds_5():
     expect_lds = [7, 5]
     assert res_lds == expect_lds
 
+def test_lis_6():
+    res_lis = lis([3, 5, 0, 1, 2 , -1, 8], 7)
+    expect_lis = [0, 1, 2, 8]
+    assert res_lis == expect_lis
+
+def test_lds_6():
+    res_lds = lds([3, 5, 0, 1, 2 , -1, 8], 7)
+    expect_lds = [5, 2, -1]
+    assert res_lds == expect_lds
+
 if __name__ == "__main__":
     test_lds_4()

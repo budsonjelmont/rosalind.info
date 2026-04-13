@@ -41,8 +41,8 @@ def lis(arr, n):
     
     for i in range(1,n):
     
-        if arr[i] <= arr[tail_ixs[0]]:
-            tail_ixs[0] = tail_ixs[1] = i
+        if arr[i] <= arr[tail_ixs[1]]:
+            tail_ixs[1] = i
         elif arr[i] > arr[tail_ixs[len]]:
             prev_ixs[i] = tail_ixs[len]
             len += 1
